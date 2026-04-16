@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusNav — College Classroom Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <div>
+        <div class="logo-name">CampusNav</div>
+        <div class="logo-sub">Classroom Intelligence System</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-page="student">
+        <span class="nav-icon">🎒</span> Student
+      </button>
+      <button class="nav-btn" data-page="admin">
+        <span class="nav-icon">🛡️</span> Admin
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- STUDENT MODULE -->
+<section id="page-student" class="page active">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🏫 Find Any Room, Instantly</div>
+      <h1 class="hero-title">Where's your <span class="grad">classroom</span>?</h1>
+      <p class="hero-desc">Search by room number, find empty classrooms, or let us suggest the perfect spot for you.</p>
+
+      <!-- QUICK SEARCH BAR -->
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="quick-search" placeholder="Type room number or lab name... (e.g. B-204, AI Lab)" autocomplete="off">
+        <button class="search-btn" onclick="quickSearch()">Search</button>
+      </div>
+      <div id="search-dropdown" class="search-dropdown hidden"></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-container">
+    <div class="tabs">
+      <button class="tab active" data-tab="location">📍 Find Location</button>
+      <button class="tab" data-tab="check">🔍 Check Availability</button>
+      <button class="tab" data-tab="empty">🟢 Empty Rooms</button>
+      <button class="tab" data-tab="suggest">🪑 Suggest a Seat</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- TAB: FIND LOCATION -->
+    <div id="tab-location" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📍</div>
+          <div>
+            <h2>Classroom Location Finder</h2>
+            <p>Enter a room number or lab name to get detailed directions</p>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Room / Lab Number</label>
+            <input type="text" id="loc-room" placeholder="e.g. B-204, G-AI-Lab, A-101" class="input">
+          </div>
+          <button class="btn btn-primary" onclick="findLocation()">Find Room →</button>
+        </div>
+        <div id="location-result" class="result-area hidden"></div>
+      </div>
+      <!-- ✅ CAMPUS MAP (ADD HERE) -->
+      <div class="card mt">
+        <div class="card-header">
+          <div class="card-icon">🗺️</div>
+          <div>
+            <h2>Campus Map</h2>
+            <p>View all blocks, entrance gate, and layout</p>
+          </div>
+        </div>
+
+        <div style="text-align:center">
+          <img src="images/campus-map.png" alt="Campus Map" 
+         style="width:100%; max-width:800px; border-radius:12px;">
+        </div>
+      </div>
+      
+      <!-- ALL ROOMS BROWSER -->
+      <div class="card mt">
+        <div class="card-header">
+          <div class="card-icon">🗂️</div>
+          <div>
+            <h2>Browse All Rooms</h2>
+            <p>Filter by block to see all classrooms and labs</p>
+          </div>
+        </div>
+        <div class="filter-row">
+          <select id="browse-block" class="input" onchange="browseRooms()">
+            <option value="">All Blocks</option>
+          </select>
+          <select id="browse-type" class="input" onchange="browseRooms()">
+            <option value="">All Types</option>
+            <option value="classroom">Classrooms</option>
+            <option value="lab">Labs</option>
+            <option value="seminar">Seminar Halls</option>
+          </select>
+        </div>
+        <div id="browse-result" class="room-grid"></div>
+      </div>
+    </div>
+
+    <!-- TAB: CHECK AVAILABILITY -->
+    <div id="tab-check" class="tab-content hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🔍</div>
+          <div>
+            <h2>Check Room Availability</h2>
+            <p>Find out if a specific room is empty or occupied right now</p>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Room Number</label>
+            <input type="text" id="avail-room" placeholder="e.g. B-204" class="input">
+          </div>
+          <button class="btn btn-primary" onclick="checkAvailability()">Check Now →</button>
+        </div>
+        <div id="availability-result" class="result-area hidden"></div>
+      </div>
+
+      <!-- TIMETABLE VIEW -->
+      <div class="card mt" id="timetable-card" style="display:none">
+        <div class="card-header">
+          <div class="card-icon">📅</div>
+          <div>
+            <h2>Weekly Timetable</h2>
+            <p id="timetable-room-label">Room schedule</p>
+          </div>
+        </div>
+        <div id="timetable-grid" class="timetable-wrap"></div>
+      </div>
+    </div>
+
+    <!-- TAB: EMPTY ROOMS -->
+    <div id="tab-empty" class="tab-content hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🟢</div>
+          <div>
+            <h2>Empty Classroom Finder</h2>
+            <p>Select a block and time slot to see all available rooms</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Block</label>
+            <select id="empty-block" class="input">
+              <option value="">All Blocks</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Day</label>
+            <select id="empty-day" class="input">
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>From</label>
+            <select id="empty-from" class="input">
+              <option value="09:00">09:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="12:00">12:00 PM</option>
+              <option value="13:00">01:00 PM</option>
+              <option value="14:00">02:00 PM</option>
+              <option value="15:00">03:00 PM</option>
+              <option value="16:00">04:00 PM</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>To</label>
+            <select id="empty-to" class="input">
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="12:00">12:00 PM</option>
+              <option value="13:00">01:00 PM</option>
+              <option value="14:00">02:00 PM</option>
+              <option value="15:00">03:00 PM</option>
+              <option value="16:00">04:00 PM</option>
+              <option value="17:00">05:00 PM</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary mt-sm" onclick="findEmptyRooms()">Find Empty Rooms →</button>
+        <div id="empty-result" class="result-area hidden"></div>
+      </div>
+    </div>
+
+    <!-- TAB: SUGGEST A SEAT -->
+    <div id="tab-suggest" class="tab-content hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🪑</div>
+          <div>
+            <h2>Suggest a Free Room</h2>
+            <p>No class right now? We'll find you a quiet spot to sit and study</p>
+          </div>
+        </div>
+        <div class="suggest-info">
+          <div class="info-chip">🕐 Based on current time</div>
+          <div class="info-chip">✨ Ranked by comfort</div>
+          <div class="info-chip">🔄 Real-time availability</div>
+        </div>
+        <button class="btn btn-primary mt-sm" onclick="suggestRooms()">Find Me a Spot →</button>
+        <div id="suggest-result" class="result-area hidden"></div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</section>
+
+<!-- ADMIN MODULE -->
+<section id="page-admin" class="page hidden">
+
+  <!-- LOGIN -->
+  <div id="admin-login-screen" class="admin-login-wrap">
+    <div class="login-card">
+      <div class="login-icon">🛡️</div>
+      <h2>Admin Portal</h2>
+      <p>Faculty &amp; Timetable Manager</p>
+      <div class="form-group mt">
+        <label>Username</label>
+        <input type="text" id="admin-username" class="input" placeholder="admin" value="admin">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="admin-password" class="input" placeholder="••••••••" value="admin123">
+      </div>
+      <div id="login-error" class="error-msg hidden"></div>
+      <button class="btn btn-primary full-w mt" onclick="adminLogin()">Login →</button>
+      <div class="login-hint">Default: admin / admin123 &nbsp;|&nbsp; faculty / faculty123</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="admin-dashboard" class="hidden">
+    <div class="admin-header">
+      <div>
+        <h2>🎛️ Admin Dashboard</h2>
+        <p id="admin-welcome">Welcome back!</p>
+      </div>
+      <button class="btn btn-outline" onclick="adminLogout()">Logout</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid" id="admin-stats">
+      <div class="stat-card"><div class="stat-num" id="stat-rooms">—</div><div class="stat-label">Total Rooms</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-blocks">—</div><div class="stat-label">Blocks</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-labs">—</div><div class="stat-label">Labs</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-occupied" style="color:#ef4444">—</div><div class="stat-label">Occupied Now</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-empty" style="color:#22c55e">—</div><div class="stat-label">Empty Now</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-slots">—</div><div class="stat-label">Timetable Slots</div></div>
+    </div>
+
+    <!-- ADMIN TABS -->
+    <div class="tabs">
+      <button class="tab active" data-admin-tab="rooms">🏫 Rooms</button>
+      <button class="tab" data-admin-tab="timetable">📅 Timetable</button>
+      <button class="tab" data-admin-tab="blocks">🏢 Blocks</button>
+    </div>
+
+    <div class="container">
+
+      <!-- ROOMS MANAGEMENT -->
+      <div id="admin-tab-rooms" class="tab-content active">
+        <div class="card" id="room-form-card">
+          <div class="card-header">
+            <h2>🏫 Add New Room</h2>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Room Number*</label>
+              <input type="text" id="new-room-no" class="input" placeholder="e.g. B-205">
+            </div>
+            <div class="form-group">
+              <label>Block*</label>
+              <select id="new-room-block" class="input"></select>
+            </div>
+            <div class="form-group">
+              <label>Floor</label>
+              <select id="new-room-floor" class="input">
+                <option value="0">Ground Floor</option>
+                <option value="1">1st Floor</option>
+                <option value="2">2nd Floor</option>
+                <option value="3">3rd Floor</option>
+                <option value="4">4th Floor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Type</label>
+              <select id="new-room-type" class="input">
+                <option value="classroom">Classroom</option>
+                <option value="lab">Lab</option>
+                <option value="seminar">Seminar Hall</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Capacity</label>
+              <input type="number" id="new-room-cap" class="input" value="60">
+            </div>
+            <div class="form-group" style="display:flex;gap:1rem;align-items:center;padding-top:1.5rem">
+              <label class="checkbox-label">
+                <input type="checkbox" id="new-room-ac"> AC Room
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="new-room-lab"> Is Lab
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Nearby Landmark</label>
+            <input type="text" id="new-room-nearby" class="input" placeholder="e.g. Opposite Seminar Hall">
+          </div>
+          <div class="form-group">
+            <label>Directions</label>
+            <textarea id="new-room-dir" class="input textarea" placeholder="Step-by-step directions..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Notes (e.g. AC, Projector, Quiet)</label>
+            <input type="text" id="new-room-notes" class="input" placeholder="AC, Projector, Corner room...">
+          </div>
+          <button id="room-submit-btn" class="btn btn-success mt-sm" onclick="addRoom()">➕ Add Room</button>
+          <button id="room-cancel-btn" class="btn btn-outline mt-sm hidden" onclick="cancelEditRoom()" style="margin-left:0.5rem">✕ Cancel Edit</button>
+          <div id="room-msg" class="msg hidden"></div>
+        </div>
+
+        <!-- ROOMS TABLE -->
+        <div class="card mt">
+          <div class="card-header">
+            <h2>📋 All Rooms</h2>
+            <input type="text" id="room-filter" class="input" style="width:200px" placeholder="Filter..." oninput="filterRoomsTable()">
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="rooms-table">
+              <thead>
+                <tr>
+                  <th>Room No</th><th>Block</th><th>Floor</th><th>Type</th><th>Cap</th><th>AC</th><th>Nearby</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rooms-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIMETABLE MANAGEMENT -->
+      <div id="admin-tab-timetable" class="tab-content hidden">
+        <div class="card" id="tt-form-card">
+          <div class="card-header">
+            <h2>📅 Add Timetable Entry</h2>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Room*</label>
+              <select id="tt-room" class="input"></select>
+            </div>
+            <div class="form-group">
+              <label>Day*</label>
+              <select id="tt-day" class="input">
+                <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+                <option>Thursday</option><option>Friday</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>From*</label>
+              <select id="tt-from" class="input">
+                <option value="09:00">09:00</option><option value="10:00">10:00</option>
+                <option value="11:00">11:00</option><option value="12:00">12:00</option>
+                <option value="13:00">13:00</option><option value="14:00">14:00</option>
+                <option value="15:00">15:00</option><option value="16:00">16:00</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>To*</label>
+              <select id="tt-to" class="input">
+                <option value="10:00">10:00</option><option value="11:00">11:00</option>
+                <option value="12:00">12:00</option><option value="13:00">13:00</option>
+                <option value="14:00">14:00</option><option value="15:00">15:00</option>
+                <option value="16:00">16:00</option><option value="17:00">17:00</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Batch</label>
+              <select id="tt-batch" class="input">
+                <option>1st Year</option><option>2nd Year</option>
+                <option>3rd Year</option><option>4th Year</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Department</label>
+              <input type="text" id="tt-dept" class="input" placeholder="CSE, ECE, MECH...">
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <input type="text" id="tt-subject" class="input" placeholder="Subject name">
+            </div>
+            <div class="form-group">
+              <label>Faculty</label>
+              <input type="text" id="tt-faculty" class="input" placeholder="Dr. Name">
+            </div>
+          </div>
+          <button id="tt-submit-btn" class="btn btn-success mt-sm" onclick="addTimetableSlot()">➕ Add Slot</button>
+          <button id="tt-cancel-btn" class="btn btn-outline mt-sm hidden" onclick="cancelEditTT()" style="margin-left:0.5rem">✕ Cancel Edit</button>
+          <div id="tt-msg" class="msg hidden"></div>
+        </div>
+
+        <div class="card mt">
+          <div class="card-header">
+            <h2>📋 Timetable Entries</h2>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Room</th><th>Day</th><th>Time</th><th>Batch</th><th>Dept</th><th>Subject</th><th>Faculty</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="tt-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCKS MANAGEMENT -->
+      <div id="admin-tab-blocks" class="tab-content hidden">
+        <div class="card" id="block-form-card">
+          <div class="card-header"><h2>🏢 Add New Block</h2></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Block Name*</label>
+              <input type="text" id="new-block-name" class="input" placeholder="e.g. Epsilon Block">
+            </div>
+            <div class="form-group">
+              <label>Short Code*</label>
+              <input type="text" id="new-block-short" class="input" placeholder="e.g. E">
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="new-block-desc" class="input" placeholder="e.g. New academic wing">
+            </div>
+          </div>
+          <button id="block-submit-btn" class="btn btn-success mt-sm" onclick="addBlock()">➕ Add Block</button>
+          <button id="block-cancel-btn" class="btn btn-outline mt-sm hidden" onclick="cancelEditBlock()" style="margin-left:0.5rem">✕ Cancel Edit</button>
+          <div id="block-msg" class="msg hidden"></div>
+        </div>
+
+        <div class="card mt">
+          <div class="card-header"><h2>📋 All Blocks</h2></div>
+          <div id="blocks-list" class="blocks-list"></div>
+        </div>
+      </div>
+
+    </div><!-- /container -->
+  </div><!-- /admin-dashboard -->
+
+</section>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
