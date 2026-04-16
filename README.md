@@ -1,100 +1,100 @@
-# 🎓 CampusNav — College Classroom Finder (MySQL Edition)
+# 🎓 campus-navigation-system
 
-Same great app — now powered by **MySQL** instead of SQLite.
+A full-stack web application that helps students locate classrooms, view directions, and find empty rooms using Node.js, Express, and MySQL.
+
+## 🚀 Quick Start (3 Steps)
+## 📥 Step 1-- Download Project
+
+1. Open GitHub and go to this repository  
+2. Click the green **Code** button  
+3. Click **Download ZIP**  
+4. Extract the ZIP file  
+5. Open the folder in VS Code  
+
+
+### Step 2 — Setup `.env` (IMPORTANT)
+
+📍 Go to:
+
+```
+backend/
+```
+
+👉 Create a file named:
+
+```
+.env
+```
+
+👉 Add this:
+
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_mysql_password_here
+DB_NAME=campus_nav
+PORT=3000
+```
+
+Note: `.env` is not included in GitHub for security reasons.
 
 ---
 
-## 🚀 Quick Start (3 steps)
+### Step 3 — Install & Run
 
-### Step 1 — Edit `.env`
-Open `backend/.env` and set your MySQL password:
-```
-DB_PASSWORD=your_mysql_password_here
-```
+Open terminal inside `backend/` folder:
 
-### Step 2 — Install & Setup
-```bash
-cd campusnav_final/backend
+```
+cd campus-navigation-system/backend
 npm install
-npm run setup        # creates database, tables and seed data
+npm run setup      # creates database, tables and seed data
 ```
 
-### Step 3 — Run
+---
+### Step 4 — Run
 ```bash
 npm start
 ```
-Open: **http://localhost:3000**
+
+## 🌐 Open in Browser
+
+```
+http://localhost:3000
+```
 
 ---
 
 ## 🔑 Default Admin Credentials
-| Username | Password | Role |
-|---|---|---|
-| `admin` | `admin123` | Super Admin |
-| `faculty` | `faculty123` | Admin |
+
+| Username | Password   | Role        |
+| -------- | ---------- | ----------- |
+| admin    | admin123   | Super Admin |
+| faculty  | faculty123 | Admin       |
 
 ---
 
-## 🗄️ MySQL Schema
+## 🗄️ MySQL Database
 
-```sql
--- Blocks (college wings/sections)
-CREATE TABLE blocks (
-  id    INT AUTO_INCREMENT PRIMARY KEY,
-  name  VARCHAR(100) NOT NULL UNIQUE,  -- "Alpha Block"
-  short VARCHAR(10)  NOT NULL,         -- "A"
-  `desc` TEXT
-);
+This project uses MySQL.
 
--- Rooms (room_no is the permanent stable identifier)
-CREATE TABLE rooms (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  room_no    VARCHAR(30) NOT NULL UNIQUE,  -- "B-204"
-  block_id   INT NOT NULL,
-  floor      TINYINT DEFAULT 0,
-  type       ENUM('classroom','lab','seminar'),
-  capacity   SMALLINT DEFAULT 60,
-  has_ac     TINYINT(1) DEFAULT 0,
-  is_lab     TINYINT(1) DEFAULT 0,
-  nearby     VARCHAR(200),
-  directions TEXT,
-  notes      TEXT,
-  FOREIGN KEY (block_id) REFERENCES blocks(id) ON DELETE RESTRICT
-);
+👉 `npm run setup` will:
 
--- Timetable (CASCADE: deleting a room removes its slots automatically)
-CREATE TABLE timetable (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  room_id    INT NOT NULL,
-  day        ENUM('Monday',...,'Sunday') NOT NULL,
-  slot_start TIME NOT NULL,
-  slot_end   TIME NOT NULL,
-  batch      VARCHAR(20),
-  dept       VARCHAR(20),
-  subject    VARCHAR(100),
-  faculty    VARCHAR(100),
-  FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
-);
-
--- Admins (bcrypt-hashed passwords)
-CREATE TABLE admins (
-  id       INT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(50) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,
-  role     VARCHAR(20) DEFAULT 'admin'
-);
-```
+* Create database
+* Create tables
+* Insert sample data
 
 ---
 
-## 📁 Structure
+## 📁 Project Structure
+
 ```
 campusnav/
 ├── backend/
-│   ├── server.js      ← Express + all API routes (MySQL)
-│   ├── db.js          ← mysql2 connection pool
-│   ├── setup.js       ← Database + table creation + seed data
-│   ├── .env           ← Your MySQL credentials (edit this!)
+│   ├── server.js
+│   ├── db.js
+│   ├── setup.js
+│   ├── .env (create manually)
 │   └── package.json
 └── frontend/
     └── public/
@@ -105,8 +105,19 @@ campusnav/
 
 ---
 
-## 🔧 Change Port
-Edit `backend/.env`:
-```
-PORT=4000
-```
+---
+
+## 💡 Features
+
+* 🔍 Classroom search
+* 🗺️ Directions & landmarks
+* 🏫 Room listing
+* 📅 Timetable
+* 🪑 Empty room finder
+* 🔐 Admin login
+---
+
+## 👨‍💻 Author
+
+Akshith Goud  
+GitHub: https://github.com/akshithgoud02
